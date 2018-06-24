@@ -738,15 +738,16 @@ creates a backtrace-mode buffer, should usually do the following:
  - Maybe set `backtrace-insert-header-function' to a function to create
    header text for the buffer.
  - Set `backtrace-frames' (see below).
- - Set `backtrace-view' if desired (see below).
+ - Maybe modify `backtrace-view' (see below).
  - Maybe set `backtrace-print-function'.
 
 A command which creates or switches to a Backtrace mode buffer,
 such as `ert-results-pop-to-backtrace-for-test-at-point', should
 initialize `backtrace-frames' to a list of `backtrace-frame'
 objects (`backtrace-get-frames' is provided for that purpose, if
-desired), and `backtrace-view' to a plist describing how it wants
-the backtrace to appear.  Finally, it should call `backtrace-print'.
+desired), and may optionally modify `backtrace-view', which is a
+plist describing the appearance of the backtrace.  Finally, it
+should call `backtrace-print'.
 
 `backtrace-print' calls `backtrace-insert-header-function'
 followed by `backtrace-print-frame', once for each stack frame."
@@ -767,6 +768,7 @@ followed by `backtrace-print-frame', once for each stack frame."
   ;; was because of bytecode. Since 2009 it's been set to t, but the
   ;; default is t so I think this isn't necessary.
   ;; (set-buffer-multibyte t)
+  (setq backtrace-view (list :do-xrefs t))
   (setq-local revert-buffer-function #'backtrace-revert)
   (setq-local filter-buffer-substring-function #'backtrace--filter-visible)
   (add-hook 'xref-backend-functions #'backtrace--xref-backend nil t))
