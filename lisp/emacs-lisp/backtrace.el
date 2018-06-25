@@ -691,7 +691,12 @@ Format it according to VIEW."
          (evald (backtrace-frame-evald frame))
          (fun   (backtrace-frame-fun frame))
          (args  (backtrace-frame-args frame))
-         (fun-file (and (plist-get view :do-xrefs) (symbol-file fun 'defun)))
+         (def   (and (symbolp fun) (fboundp fun) (symbol-function fun)))
+         (fun-file (and (plist-get view :do-xrefs)
+                        (or (symbol-file fun 'defun)
+                            (and (subrp def)
+                                 (not (eq 'unevalled (cdr (subr-arity def))))
+                                 (find-lisp-object-file-name fun def)))))
          (fun-pt (point)))
     (cond
      ((and evald (not debugger-stack-frame-as-list))
@@ -717,7 +722,7 @@ Format it according to VIEW."
     (when fun-file
       (make-text-button fun-pt (+ fun-pt (length (symbol-name fun)))
                         :type 'help-function-def
-                        'help-args (list fun fun-file)))
+                        'help-args (list fun fun-file nil)))
     ;; After any frame that uses eval-buffer, insert a comment that
     ;; states the buffer position it's reading at.
     (when (backtrace-frame-pos frame)
